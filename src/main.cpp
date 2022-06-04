@@ -9,13 +9,13 @@
   Node-RED mediante MQTT. Enviara todos los datos que recibe de la placa principal por el puerto serial y escribira en el mismo  puerto los datos que recibe de MQTT.
 */
 
-#include <ESP8266WiFi.h> //Librería proporciona las rutinas específicas WiFi de ESP8266
-#include <DNSServer.h> //Librería proporciona las rutinas de DNS
+#include <ESP8266WiFi.h>       //Librería proporciona las rutinas específicas WiFi de ESP8266
+#include <DNSServer.h>         //Librería proporciona las rutinas de DNS
 #include <ESP8266WebServer.h > //Librería proporciona las rutinas de servidor web de ESP8266
-#include <WiFiManager.h> //A dministrador de conexión WiFi Espressif ESPx con portal de configuración web alternativo
-#include <Ticker.h> //Librería proporciona las rutinas de temporización
-#include <Arduino.h> //Librería proporciona las rutinas de Arduino
-#include <PubSubClient.h> //Librería proporciona las rutinas de MQTT
+#include <WiFiManager.h>       //A dministrador de conexión WiFi Espressif ESPx con portal de configuración web alternativo
+#include <Ticker.h>            //Librería proporciona las rutinas de temporización
+#include <Arduino.h>           //Librería proporciona las rutinas de Arduino
+#include <PubSubClient.h>      //Librería proporciona las rutinas de MQTT
 
 // Instancia a la clase Ticker para el temporizador
 Ticker ticker;
@@ -53,7 +53,7 @@ void setup()
   // Cremos AP y portal cautivo y comprobamos si se establece la conexión
   if (!wifiManager.autoConnect("AcuaponicDuino"))
   {
-    //Serial.println("Fallo en la conexión (timeout)");
+    // Serial.println("Fallo en la conexión (timeout)");
     ESP.reset();
     delay(1000);
   }
@@ -145,13 +145,23 @@ void reconnect()
       {
         Serial.println("Se ha realizado la suscripcion a CONFIG/TEMPERATURA correctamente");
       }
+      correcto = client.subscribe("AcuaponicDuino/Config/tempMax");
+      if (correcto == true)
+      {
+        Serial.println("Se ha realizado la suscripcion a CONFIG/TEMPMAX correctamente");
+      }
+      correcto = client.subscribe("AcuaponicDuino/Config/tempMin");
+      if (correcto == true)
+      {
+        Serial.println("Se ha realizado la suscripcion a CONFIG/TEMPMIN correctamente");
+      }
     }
     else
     {
       // Si no hemos podido conectarnos lo intentamos en cincos segundos
-      //Serial.print("Fallo de conexion, rc=");
-      //Serial.print(client.state());
-      //Serial.println(" Reconctando en 5 segundos");
+      // Serial.print("Fallo de conexion, rc=");
+      // Serial.print(client.state());
+      // Serial.println(" Reconctando en 5 segundos");
       delay(5000);
     }
   }
@@ -278,6 +288,24 @@ void serialEvent()
           command = "";
         }
         if (topic == "AcuaponicDuino/Start/TempAgua")
+        {
+          length = command.length() + 1;
+          command.toCharArray(payload, length);
+          client.publish(topic.c_str(), payload);
+          mensaje = "";
+          topic = "";
+          command = "";
+        }
+        if (topic == "AcuaponicDuino/Start/tempMax")
+        {
+          length = command.length() + 1;
+          command.toCharArray(payload, length);
+          client.publish(topic.c_str(), payload);
+          mensaje = "";
+          topic = "";
+          command = "";
+        }
+        if (topic == "AcuaponicDuino/Start/tempMin")
         {
           length = command.length() + 1;
           command.toCharArray(payload, length);
